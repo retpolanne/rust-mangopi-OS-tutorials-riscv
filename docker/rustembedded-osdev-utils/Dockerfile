@@ -5,8 +5,7 @@
 FROM ubuntu:20.04
 
 ARG VCS_REF
-ARG GCC_AARCH64=https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-aarch64-aarch64-none-elf.tar.xz
-ARG GCC_X86_64=https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz
+ARG GCC_RISCV64=https://riscvtoolchain.nyc3.digitaloceanspaces.com/riscv64-toolchain-linux-gnu.tar.gz
 
 LABEL org.label-schema.vcs-ref=$VCS_REF \
     org.label-schema.vcs-url="https://github.com/rust-embedded/rust-raspberrypi-OS-tutorials"
@@ -38,19 +37,19 @@ RUN set -ex;                                      \
         libglib2.0-dev                            \
         libusb-1.0.0-dev                          \
         locales                                   \
+        openssl                                   \
         python3                                   \
         ruby                                      \
         ruby-dev                                  \
     ;                                             \
-    # GCC AArch64 tools
-    if [ "$(uname -m)" = "aarch64" ]; then wget ${GCC_AARCH64}; else wget ${GCC_X86_64}; fi; \
-    tar -xf gcc-arm-10*;                                                                     \
+    wget -q ${GCC_RISCV64};                                                                  \
+    tar -xzf riscv*;                                                                        \
     cp                                                                                       \
-        gcc-arm-10*/bin/aarch64-none-elf-objdump                                             \
-        gcc-arm-10*/bin/aarch64-none-elf-readelf                                             \
-        gcc-arm-10*/bin/aarch64-none-elf-nm                                                  \
+        riscv/bin/riscv64-unknown-linux-gnu-objdump                                          \
+        riscv/bin/riscv64-unknown-linux-gnu-readelf                                          \
+        riscv/bin/riscv64-unknown-linux-gnu-nm                                               \
         /usr/local/bin/;                                                                     \
-    rm -rf gcc-arm-10*;                                                                      \
+    rm -rf riscv;                                                                            \
     # Ruby dependencies
     gem install bundler;                             \
     bundle config set --local without 'development'; \
@@ -59,7 +58,8 @@ RUN set -ex;                                      \
     git clone https://gitlab.com/qemu-project/qemu.git;        \
     cd qemu;                                                   \
     git checkout tags/v6.1.0;                                  \
-    ./configure --target-list=aarch64-softmmu --enable-modules \
+    ./configure --target-list=riscv64-softmmu  \
+        --enable-modules                                       \
         --enable-tcg-interpreter --enable-debug-tcg            \
         --python=/usr/bin/python3;                             \
     make -j10;                                                 \

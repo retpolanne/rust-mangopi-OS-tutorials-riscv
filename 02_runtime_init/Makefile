@@ -42,6 +42,17 @@ else ifeq ($(BSP),rpi4)
     READELF_BINARY    = aarch64-none-elf-readelf
     LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/raspberrypi
     RUSTC_MISC_ARGS   = -C target-cpu=cortex-a72
+else ifeq ($(BSP),mangopi)
+    TARGET            = riscv64gc-unknown-none-elf
+    KERNEL_BIN        = kernel8.img
+    QEMU_BINARY       = qemu-system-riscv64
+    QEMU_MACHINE_TYPE = virt
+    QEMU_RELEASE_ARGS = -d in_asm -display none
+    OBJDUMP_BINARY    = riscv64-unknown-linux-gnu-objdump
+    NM_BINARY         = riscv64-unknown-linux-gnu-nm
+    READELF_BINARY    = riscv64-unknown-linux-gnu-readelf
+    LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/mangopi
+    RUSTC_MISC_ARGS   =
 endif
 
 # Export for build.rs.

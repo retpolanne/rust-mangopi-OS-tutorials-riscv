@@ -11,6 +11,7 @@ lto = true
 default = []
 bsp_rpi3 = []
 bsp_rpi4 = []
+bsp_mangopi = []
 
 [[bin]]
 name = "kernel"

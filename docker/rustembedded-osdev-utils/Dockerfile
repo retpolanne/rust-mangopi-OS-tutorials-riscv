@@ -2,10 +2,11 @@
 ##
 ## Copyright (c) 2017-2023 Andre Richter <andre.o.richter@gmail.com>
 ## Copyright (c) 2019-2023 Nao Taco <naotaco@gmail.com>
-FROM ubuntu:20.04
+FROM debian:experimental
 
 ARG VCS_REF
 ARG GCC_RISCV64=https://riscvtoolchain.nyc3.digitaloceanspaces.com/riscv64-toolchain-linux-gnu.tar.gz
+ARG PYTHON311=https://www.python.org/ftp/python/3.11.0/Python-3.11.0.tgz
 
 LABEL org.label-schema.vcs-ref=$VCS_REF \
     org.label-schema.vcs-url="https://github.com/rust-embedded/rust-raspberrypi-OS-tutorials"
@@ -41,15 +42,24 @@ RUN set -ex;                                      \
         python3                                   \
         ruby                                      \
         ruby-dev                                  \
+        guile-3.0-dev                             \
     ;                                             \
     wget -q ${GCC_RISCV64};                                                                  \
     tar -xzf riscv*;                                                                        \
+    wget -q ${PYTHON311};                                                                  \
+    tar -xzf Python*;                                                                        \
     cp                                                                                       \
         riscv/bin/riscv64-unknown-linux-gnu-objdump                                          \
         riscv/bin/riscv64-unknown-linux-gnu-readelf                                          \
         riscv/bin/riscv64-unknown-linux-gnu-nm                                               \
+        riscv/bin/riscv64-unknown-linux-gnu-gdb                                              \
         /usr/local/bin/;                                                                     \
     rm -rf riscv;                                                                            \
+    cd Python-3.11.0;                                                                            \
+    ./configure --enable-optimizations -with-lto --enable-shared;                                 \
+    make sharedinstall;                                                                            \
+    mv libpython3.11.so.1.0 /usr/lib;                                                               \
+    cd ..;                                                                            \
     # Ruby dependencies
     gem install bundler;                             \
     bundle config set --local without 'development'; \
@@ -61,8 +71,9 @@ RUN set -ex;                                      \
     ./configure --target-list=riscv64-softmmu  \
         --enable-modules                                       \
         --enable-tcg-interpreter --enable-debug-tcg            \
+        --disable-werror		                       \
         --python=/usr/bin/python3;                             \
-    make -j10;                                                 \
+    make -j12;                                                 \
     make install;                                              \
     cd ..;                                                     \
     rm -rf qemu;                                               \
@@ -95,3 +106,10 @@ COPY rpi4.cfg /openocd/
 
 # GDB
 COPY auto /root/.gdbinit.d/auto
+
+# Rust
+RUN apt update && apt install curl -y && curl https://sh.rustup.rs -sSf | bash -s -- -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+ENV RUST_GDB="/usr/local/bin/riscv64-unknown-linux-gnu-gdb"

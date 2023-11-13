@@ -42,6 +42,17 @@ else ifeq ($(BSP),rpi4)
     READELF_BINARY    = aarch64-none-elf-readelf
     LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/raspberrypi
     RUSTC_MISC_ARGS   = -C target-cpu=cortex-a72
+else ifeq ($(BSP),mangopi)
+    TARGET            = riscv64gc-unknown-none-elf
+    KERNEL_BIN        = kernel8.img
+    QEMU_BINARY       = qemu-system-riscv64
+    QEMU_MACHINE_TYPE = virt
+    QEMU_RELEASE_ARGS = -serial stdio -display none -bios none
+    OBJDUMP_BINARY    = riscv64-unknown-linux-gnu-objdump
+    NM_BINARY         = riscv64-unknown-linux-gnu-nm
+    READELF_BINARY    = riscv64-unknown-linux-gnu-readelf
+    LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/mangopi
+    RUSTC_MISC_ARGS   =
 endif
 
 # Export for build.rs.
@@ -56,7 +67,7 @@ KERNEL_MANIFEST      = Cargo.toml
 KERNEL_LINKER_SCRIPT = kernel.ld
 LAST_BUILD_CONFIG    = target/$(BSP).build_config
 
-KERNEL_ELF      = target/$(TARGET)/release/kernel
+KERNEL_ELF      = target/$(TARGET)/debug/kernel
 # This parses cargo's dep-info file.
 # https://doc.rust-lang.org/cargo/guide/build-cache.html#dep-info-files
 KERNEL_ELF_DEPS = $(filter-out %: ,$(file < $(KERNEL_ELF).d)) $(KERNEL_MANIFEST) $(LAST_BUILD_CONFIG)
@@ -76,8 +87,7 @@ RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) \
 
 FEATURES      = --features bsp_$(BSP)
 COMPILER_ARGS = --target=$(TARGET) \
-    $(FEATURES)                    \
-    --release
+    $(FEATURES)
 
 RUSTC_CMD   = cargo rustc $(COMPILER_ARGS)
 DOC_CMD     = cargo doc $(COMPILER_ARGS)

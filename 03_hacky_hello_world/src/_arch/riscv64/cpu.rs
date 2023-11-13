@@ -11,7 +11,7 @@
 //!
 //! crate::cpu::arch_cpu
 
-use aarch64_cpu::asm;
+use riscv::asm;
 
 //--------------------------------------------------------------------------------------------------
 // Public Code
@@ -21,6 +21,8 @@ use aarch64_cpu::asm;
 #[inline(always)]
 pub fn wait_forever() -> ! {
     loop {
-        asm::wfe()
+        unsafe {
+            asm::wfi()
+        }
     }
 }

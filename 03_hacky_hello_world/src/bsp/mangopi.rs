@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2018-2023 Andre Richter <andre.o.richter@gmail.com>
 
-//! Top-level BSP file for the Raspberry Pi 3 and 4.
+//! Top-level BSP file for the MangoPi. 
 
 pub mod console;
 pub mod cpu;

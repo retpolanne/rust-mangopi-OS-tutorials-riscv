@@ -3,13 +3,13 @@
  * Copyright (c) 2018-2022 Andre Richter <andre.o.richter@gmail.com>
  */
 
-__rpi_phys_dram_start_addr = 0;
+__mangopi_phys_dram_start_addr = 0x80000000;
 
 /* The physical address at which the the kernel binary will be loaded by the Raspberry's firmware */
-__rpi_phys_binary_load_addr = 0x80000;
+__mangopi_phys_binary_load_addr = 0x80000000;
 
 
-ENTRY(__rpi_phys_binary_load_addr)
+ENTRY(__mangopi_phys_binary_load_addr)
 
 /* Flags:
  *     4 == R
@@ -21,26 +21,14 @@ ENTRY(__rpi_phys_binary_load_addr)
  */
 PHDRS
 {
-    segment_boot_core_stack PT_LOAD FLAGS(6);
     segment_code            PT_LOAD FLAGS(5);
     segment_data            PT_LOAD FLAGS(6);
+    segment_boot_core_stack PT_LOAD FLAGS(6);
 }
 
 SECTIONS
 {
-    . =  __rpi_phys_dram_start_addr;
-
-    /***********************************************************************************************
-    * Boot Core Stack
-    ***********************************************************************************************/
-    .boot_core_stack (NOLOAD) :
-    {
-                                             /*   ^             */
-                                             /*   | stack       */
-        . += __rpi_phys_binary_load_addr;    /*   | growth      */
-                                             /*   | direction   */
-        __boot_core_stack_end_exclusive = .; /*   |             */
-    } :segment_boot_core_stack
+    . =  __mangopi_phys_dram_start_addr;
 
     /***********************************************************************************************
     * Code + RO Data + Global Offset Table
@@ -55,6 +43,7 @@ SECTIONS
 
     .rodata : ALIGN(8) { *(.rodata*) } :segment_code
 
+
     /***********************************************************************************************
     * Data + BSS
     ***********************************************************************************************/
@@ -68,6 +57,18 @@ SECTIONS
         . = ALIGN(16);
         __bss_end_exclusive = .;
     } :segment_data
+
+    /***********************************************************************************************
+    * Boot Core Stack
+    ***********************************************************************************************/
+    .boot_core_stack (NOLOAD) :
+    {
+        __boot_core_stack_start = __bss_end_exclusive; /*   ^             */
+                                                 /*   | stack       */
+                                                 /*   | growth      */
+                                                 /*   | direction   */
+        __boot_core_stack_end_exclusive = __mangopi_phys_binary_load_addr;     /*   |             */
+    } :segment_boot_core_stack
 
     /***********************************************************************************************
     * Misc

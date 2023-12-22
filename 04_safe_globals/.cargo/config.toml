@@ -1,0 +1,4 @@
+[rust]
+debug = true
+debuginfo-level = 2
+new-symbol-mangling = false

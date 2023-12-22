@@ -11,6 +11,7 @@ lto = true
 default = []
 bsp_rpi3 = []
 bsp_rpi4 = []
+bsp_mangopi = []
 
 [[bin]]
 name = "kernel"
@@ -23,5 +24,5 @@ path = "src/main.rs"
 [dependencies]
 
 # Platform specific dependencies
-[target.'cfg(target_arch = "aarch64")'.dependencies]
-aarch64-cpu = { version = "9.x.x" }
+[target.'cfg(target_arch = "riscv64")'.dependencies]
+riscv = { version = "0.10.x" }

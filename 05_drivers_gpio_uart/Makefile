@@ -13,9 +13,6 @@ include ../common/operating_system.mk
 # Default to the RPi3.
 BSP ?= rpi3
 
-# Default to a serial device name that is common in Linux.
-DEV_SERIAL ?= /dev/ttyUSB0
-
 
 
 ##--------------------------------------------------------------------------------------------------
@@ -45,6 +42,17 @@ else ifeq ($(BSP),rpi4)
     READELF_BINARY    = aarch64-none-elf-readelf
     LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/raspberrypi
     RUSTC_MISC_ARGS   = -C target-cpu=cortex-a72
+else ifeq ($(BSP),mangopi)
+    TARGET            = riscv64gc-unknown-none-elf
+    KERNEL_BIN        = kernel8.img
+    QEMU_BINARY       = qemu-system-riscv64
+    QEMU_MACHINE_TYPE = virt
+    QEMU_RELEASE_ARGS = -serial stdio -display none -bios none
+    OBJDUMP_BINARY    = riscv64-unknown-linux-gnu-objdump
+    NM_BINARY         = riscv64-unknown-linux-gnu-nm
+    READELF_BINARY    = riscv64-unknown-linux-gnu-readelf
+    LD_SCRIPT_PATH    = $(shell pwd)/src/bsp/mangopi
+    RUSTC_MISC_ARGS   =
 endif
 
 # Export for build.rs.
@@ -59,7 +67,7 @@ KERNEL_MANIFEST      = Cargo.toml
 KERNEL_LINKER_SCRIPT = kernel.ld
 LAST_BUILD_CONFIG    = target/$(BSP).build_config
 
-KERNEL_ELF      = target/$(TARGET)/release/kernel
+KERNEL_ELF      = target/$(TARGET)/debug/kernel
 # This parses cargo's dep-info file.
 # https://doc.rust-lang.org/cargo/guide/build-cache.html#dep-info-files
 KERNEL_ELF_DEPS = $(filter-out %: ,$(file < $(KERNEL_ELF).d)) $(KERNEL_MANIFEST) $(LAST_BUILD_CONFIG)
@@ -80,7 +88,6 @@ RUSTFLAGS_PEDANTIC = $(RUSTFLAGS) \
 FEATURES      = --features bsp_$(BSP)
 COMPILER_ARGS = --target=$(TARGET) \
     $(FEATURES)                    \
-    --release
 
 RUSTC_CMD   = cargo rustc $(COMPILER_ARGS)
 DOC_CMD     = cargo doc $(COMPILER_ARGS)
@@ -91,7 +98,6 @@ OBJCOPY_CMD = rust-objcopy \
 
 EXEC_QEMU          = $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE)
 EXEC_TEST_DISPATCH = ruby ../common/tests/dispatch.rb
-EXEC_MINITERM      = ruby ../common/serial/miniterm.rb
 
 ##------------------------------------------------------------------------------
 ## Dockerization
@@ -99,26 +105,18 @@ EXEC_MINITERM      = ruby ../common/serial/miniterm.rb
 DOCKER_CMD            = docker run -t --rm -v $(shell pwd):/work/tutorial -w /work/tutorial
 DOCKER_CMD_INTERACT   = $(DOCKER_CMD) -i
 DOCKER_ARG_DIR_COMMON = -v $(shell pwd)/../common:/work/common
-DOCKER_ARG_DEV        = --privileged -v /dev:/dev
 
 # DOCKER_IMAGE defined in include file (see top of this file).
 DOCKER_QEMU  = $(DOCKER_CMD_INTERACT) $(DOCKER_IMAGE)
 DOCKER_TOOLS = $(DOCKER_CMD) $(DOCKER_IMAGE)
 DOCKER_TEST  = $(DOCKER_CMD) $(DOCKER_ARG_DIR_COMMON) $(DOCKER_IMAGE)
 
-# Dockerize commands, which require USB device passthrough, only on Linux.
-ifeq ($(shell uname -s),Linux)
-    DOCKER_CMD_DEV = $(DOCKER_CMD_INTERACT) $(DOCKER_ARG_DEV)
-
-    DOCKER_MINITERM = $(DOCKER_CMD_DEV) $(DOCKER_ARG_DIR_COMMON) $(DOCKER_IMAGE)
-endif
-
 
 
 ##--------------------------------------------------------------------------------------------------
 ## Targets
 ##--------------------------------------------------------------------------------------------------
-.PHONY: all doc qemu miniterm clippy clean readelf objdump nm check
+.PHONY: all doc qemu clippy clean readelf objdump nm check
 
 all: $(KERNEL_BIN)
 
@@ -150,7 +148,7 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 
 ##------------------------------------------------------------------------------
 ## Generate the documentation
-##-----------------------------------------------------------------------------
+##------------------------------------------------------------------------------
 doc:
 	$(call color_header, "Generating docs")
 	@$(DOC_CMD) --document-private-items --open
@@ -168,14 +166,7 @@ else # QEMU is supported.
 qemu: $(KERNEL_BIN)
 	$(call color_header, "Launching QEMU")
 	@$(DOCKER_QEMU) $(EXEC_QEMU) $(QEMU_RELEASE_ARGS) -kernel $(KERNEL_BIN)
-
 endif
-
-##------------------------------------------------------------------------------
-## Connect to the target's serial
-##------------------------------------------------------------------------------
-miniterm:
-	@$(DOCKER_MINITERM) $(EXEC_MINITERM) $(DEV_SERIAL)
 
 ##------------------------------------------------------------------------------
 ## Run clippy

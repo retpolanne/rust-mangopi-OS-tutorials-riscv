@@ -11,6 +11,7 @@ lto = true
 default = []
 bsp_rpi3 = ["tock-registers"]
 bsp_rpi4 = ["tock-registers"]
+bsp_mangopi = ["tock-registers"]
 
 [[bin]]
 name = "kernel"
@@ -26,5 +27,5 @@ path = "src/main.rs"
 tock-registers = { version = "0.8.x", default-features = false, features = ["register_types"], optional = true }
 
 # Platform specific dependencies
-[target.'cfg(target_arch = "aarch64")'.dependencies]
-aarch64-cpu = { version = "9.x.x" }
+[target.'cfg(target_arch = "riscv64")'.dependencies]
+riscv = { version = "0.1.x" }

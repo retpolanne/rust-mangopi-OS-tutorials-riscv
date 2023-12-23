@@ -66,8 +66,10 @@ SECTIONS
         __boot_core_stack_start = .; /*   ^             */
                                                  /*   | stack       */
                                                  /*   | growth      */
+	*(.boot_core_stack*);
+	. = ALIGN(0x80000);
                                                  /*   | direction   */
-        __boot_core_stack_end_exclusive = __boot_core_stack_start + 0x80000;     /*   |             */
+        __boot_core_stack_end_exclusive = .;     /*   |             */
     } :segment_boot_core_stack
 
     /***********************************************************************************************

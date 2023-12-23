@@ -46,7 +46,7 @@ _start:
 	// Prepare the jump to Rust code.
 .L_prepare_rust:
 	// Set the stack pointer.
-	la sp, __boot_core_stack_start
+	la sp, __boot_core_stack_end_exclusive
 
 	// Jump to Rust code.
 	li t0, (0b11 << 11) | (1 << 7) | (1 << 3)

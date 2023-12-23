@@ -13,7 +13,8 @@ use core::fmt;
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    console::console().write_fmt(args).unwrap();
+    let con = console::console();
+    con.write_fmt(args).unwrap();
 }
 
 /// Prints without a newline.

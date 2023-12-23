@@ -61,13 +61,14 @@ SECTIONS
     /***********************************************************************************************
     * Boot Core Stack
     ***********************************************************************************************/
-    .boot_core_stack (NOLOAD) :
+    .boot_core_stack (NOLOAD) : ALIGN(64)
     {
-        __boot_core_stack_start = __bss_end_exclusive; /*   ^             */
+        __boot_core_stack_start = .; /*   ^             */
                                                  /*   | stack       */
                                                  /*   | growth      */
+	*(.boot_core_stack*);
                                                  /*   | direction   */
-        __boot_core_stack_end_exclusive = __mangopi_phys_binary_load_addr;     /*   |             */
+        __boot_core_stack_end_exclusive = __boot_core_stack_start + 0x80000;     /*   |             */
     } :segment_boot_core_stack
 
     /***********************************************************************************************

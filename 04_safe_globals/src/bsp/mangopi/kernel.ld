@@ -3,10 +3,10 @@
  * Copyright (c) 2018-2022 Andre Richter <andre.o.richter@gmail.com>
  */
 
-__mangopi_phys_dram_start_addr = 0x80000000;
+__mangopi_phys_dram_start_addr = 0x80200000;
 
 /* The physical address at which the the kernel binary will be loaded by the Raspberry's firmware */
-__mangopi_phys_binary_load_addr = 0x80000000;
+__mangopi_phys_binary_load_addr = 0x80200000;
 
 
 ENTRY(__mangopi_phys_binary_load_addr)
@@ -40,6 +40,8 @@ SECTIONS
         *(.text._start_rust)      /* The Rust entry point */
         *(.text*)                 /* Everything else */
     } :segment_code
+
+    __global_pointer = .;
 
     .rodata : ALIGN(8) { *(.rodata*) } :segment_code
 

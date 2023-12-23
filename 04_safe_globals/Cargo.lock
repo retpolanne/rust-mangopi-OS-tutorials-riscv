@@ -29,6 +29,7 @@ name = "mingo"
 version = "0.4.0"
 dependencies = [
  "riscv",
+ "sbi",
 ]
 
 [[package]]
@@ -56,6 +57,12 @@ dependencies = [
  "critical-section",
  "embedded-hal",
 ]
+
+[[package]]
+name = "sbi"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29cb0870400aca7e4487e8ec1e93f9d4288da763cb1da2cedc5102e62b6522ad"
 
 [[package]]
 name = "void"

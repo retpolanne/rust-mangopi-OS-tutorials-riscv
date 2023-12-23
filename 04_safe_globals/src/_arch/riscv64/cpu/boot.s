@@ -17,18 +17,21 @@
 //--------------------------------------------------------------------------------------------------
 // Public Code
 //--------------------------------------------------------------------------------------------------
+.option norvc
 .section .text._start
 
 //------------------------------------------------------------------------------
 // fn _start()
 //------------------------------------------------------------------------------
+.global _start
 _start:
+	csrw satp, zero
 	// Only proceed on the boot core. Park it otherwise.
-	csrr t0, mhartid
-	bnez t0, .L_parking_loop
-
+	//csrr a0, mhartid
+	//bnez a0, .L_parking_loop
 .option push
 .option norelax
+	la gp, __global_pointer
 .option pop
 
 	// If execution reaches here, it is the boot core.
@@ -50,10 +53,10 @@ _start:
 
 	// Jump to Rust code.
 	li t0, (0b11 << 11) | (1 << 7) | (1 << 3)
-	csrw mstatus, t0
+	//csrw mstatus, t0
 	la t1, _start_rust
-	csrw mepc, t1
-	mret
+	//csrw mepc, t1
+	call _start_rust
 
 	// Infinitely wait for events (aka "park the core").
 .L_parking_loop:

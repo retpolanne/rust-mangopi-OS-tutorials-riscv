@@ -44,9 +44,10 @@ impl QEMUOutputInner {
 
     /// Send a character.
     fn write_char(&mut self, c: char) {
-        unsafe {
-            core::ptr::write_volatile(0x1000_0000 as *mut u8, c as u8);
-        }
+        /*unsafe {
+            core::ptr::write_volatile(0x1001_0000 as *mut u8, c as u8);
+        }*/
+        sbi::legacy::console_putchar(c.try_into().unwrap());
 
         self.chars_written += 1;
     }

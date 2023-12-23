@@ -26,3 +26,4 @@ path = "src/main.rs"
 # Platform specific dependencies
 [target.'cfg(target_arch = "riscv64")'.dependencies]
 riscv = { version = "0.10.x" }
+sbi = "0.2"

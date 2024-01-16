@@ -47,7 +47,7 @@ else ifeq ($(BSP),mangopi)
     KERNEL_BIN        = kernel8.img
     QEMU_BINARY       = qemu-system-riscv64
     QEMU_MACHINE_TYPE = virt
-    QEMU_RELEASE_ARGS = -serial stdio -display none -s -S
+    QEMU_RELEASE_ARGS = -serial stdio -display none
     OBJDUMP_BINARY    = riscv64-unknown-linux-gnu-objdump
     NM_BINARY         = riscv64-unknown-linux-gnu-nm
     READELF_BINARY    = riscv64-unknown-linux-gnu-readelf

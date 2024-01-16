@@ -126,12 +126,8 @@ mod synchronization;
 ///
 /// - Only a single core must be active and running this function.
 unsafe fn kernel_init() -> ! {
-    use console::console;
 
-    println!("[0] Hello from Rust!");
+    println!("Madu, te amo.\nDesde que nos conhecemos, assim do nada, me sinto muito feliz!\nVoce e uma garota incrível, o amor da minha vida, e eu amo estar contigo.\nEspero que o que temos hoje dure muito tempo.\nEu sempre me perco nos teus olhos\nE perco tudo quando voce da uma de doidinha\nEspecialmente por eu ser tambem doidinha\nEu te amo muito, mesmo\nCom muito amor, Anne Isabelle :3");
 
-    println!("[1] Chars written: {}", console().chars_written());
-
-    println!("[2] Stopping here.");
     cpu::wait_forever()
 }
